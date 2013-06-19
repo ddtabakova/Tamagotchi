@@ -10,11 +10,11 @@ class Panda(pygame.sprite.Sprite):
     EVENT_SLEEPY = pygame.USEREVENT + 4
     EVENT_ILL = pygame.USEREVENT + 5
     
-    REDUCE_FEED_BY = 0.20
-    REDUCE_CLEAN_BY = 0.10
-    REDUCE_PLAY_BY = 0.25
-    REDUCE_SLEEP_BY = 0.25
-    REDUCE_CURE_BY = 0.50
+    UPDATE_FEED_BY = 0.20
+    UPDATE_CLEAN_BY = 0.10
+    UPDATE_PLAY_BY = 0.25
+    UPDATE_SLEEP_BY = 0.25
+    UPDATE_CURE_BY = 0.50
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -77,22 +77,36 @@ class Panda(pygame.sprite.Sprite):
         self._happiness = (self._feed + self._clean + self._play
                            + self._sleep + self._cure)/5
  
-    def make_hungry(self):
-        self._feed = max(self._feed-self.REDUCE_FEED_BY, 0.0)
+    def update_hungry(self, is_positive_update):
+        update = self.UPDATE_FEED_BY*is_positive_update
+        self._feed = self.__update_feeling(update, is_positive_update)
         self.calculate_happiness()
 
-    def make_dirty(self):
-        self._clean = max(self._clean-self.REDUCE_CLEAN_BY, 0.0)
+    def update_dirty(self, is_positive_update):
+        update = self.UPDATE_CLEAN_BY*is_positive_update
+        self._clean = self.__update_feeling(update, is_positive_update)
         self.calculate_happiness()
 
-    def make_playful(self):
-        self._play = max(self._play-self.REDUCE_PLAY_BY, 0.0)
+    def update_playful(self, is_positive_update):
+        update = self.UPDATE_CLEAN_BY*is_positive_update
+        self._play = self.__update_feeling(update, is_positive_update)
         self.calculate_happiness()
 
-    def make_sleepy(self):
-        self._sleep = max(self._sleep-self.REDUCE_SLEEP_BY, 0.0)
+    def update_sleepy(self, is_positive_update):
+        update = self.UPDATE_SLEEP_BY*is_positive_update
+        self._sleep = self.__update_feeling(update, is_positive_update)
         self.calculate_happiness()
 
-    def make_ill(self):
-        self._cure = max(self._cure-self.REDUCE_CURE_BY, 0.0)
+    def update_ill(self, is_positive_update):
+        update = self.UPDATE_CURE_BY*is_positive_update
+        self._cure = self.__update_feeling(update, is_positive_update)
         self.calculate_happiness()
+
+    def __update_feeling(self, update, is_positive_update):
+        feeling = 1.0
+        if is_positive_update == 1:
+            feeling = min(feeling+update, 1.0)
+        else:
+            feeling = max(feeling+update, 0.0)
+        return feeling
+        
