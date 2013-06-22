@@ -3,7 +3,11 @@ pygame.init()
 
 
 class Panda(pygame.sprite.Sprite):
-
+    TIME_HUNGRY = 30000
+    TIME_DIRTY = 30000
+    TIME_PLAYFUL = 75000
+    TIME_SLEEPY = 75000
+    
     EVENT_HUNGRY = pygame.USEREVENT + 1
     EVENT_DIRTY = pygame.USEREVENT + 2
     EVENT_PLAYFUL = pygame.USEREVENT + 3
@@ -15,6 +19,9 @@ class Panda(pygame.sprite.Sprite):
     UPDATE_PLAY_BY = 0.25
     UPDATE_SLEEP_BY = 0.25
     UPDATE_CURE_BY = 0.50
+
+    POSITIVE_UPDATE = 1.0
+    NEGATIVE_UPDATE = -1.0
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -78,7 +85,9 @@ class Panda(pygame.sprite.Sprite):
                            + self._sleep + self._cure)/5
  
     def update_hungry(self, is_positive_update):
+        print("update hungry")
         update = self.UPDATE_FEED_BY*is_positive_update
+        print(update)
         self._feed = self.__update_feeling(update, is_positive_update)
         self.calculate_happiness()
 
