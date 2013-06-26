@@ -85,35 +85,32 @@ class Panda(pygame.sprite.Sprite):
                            + self._sleep + self._cure)/5
  
     def update_hungry(self, is_positive_update):
-        print("update hungry")
         update = self.UPDATE_FEED_BY*is_positive_update
-        print(update)
-        self._feed = self.__update_feeling(update, is_positive_update)
+        self._feed = self.__update_feeling(self._feed, update, is_positive_update)
         self.calculate_happiness()
 
     def update_dirty(self, is_positive_update):
         update = self.UPDATE_CLEAN_BY*is_positive_update
-        self._clean = self.__update_feeling(update, is_positive_update)
+        self._clean = self.__update_feeling(self._clean, update, is_positive_update)
         self.calculate_happiness()
 
     def update_playful(self, is_positive_update):
         update = self.UPDATE_CLEAN_BY*is_positive_update
-        self._play = self.__update_feeling(update, is_positive_update)
+        self._play = self.__update_feeling(self._play, update, is_positive_update)
         self.calculate_happiness()
 
     def update_sleepy(self, is_positive_update):
         update = self.UPDATE_SLEEP_BY*is_positive_update
-        self._sleep = self.__update_feeling(update, is_positive_update)
+        self._sleep = self.__update_feeling(self._sleep, update, is_positive_update)
         self.calculate_happiness()
 
     def update_ill(self, is_positive_update):
         update = self.UPDATE_CURE_BY*is_positive_update
-        self._cure = self.__update_feeling(update, is_positive_update)
+        self._cure = self.__update_feeling(self._cure, update, is_positive_update)
         self.calculate_happiness()
 
-    def __update_feeling(self, update, is_positive_update):
-        feeling = 1.0
-        if is_positive_update == 1:
+    def __update_feeling(self, feeling, update, is_positive_update):
+        if is_positive_update == self.POSITIVE_UPDATE:
             feeling = min(feeling+update, 1.0)
         else:
             feeling = max(feeling+update, 0.0)

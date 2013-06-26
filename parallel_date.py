@@ -9,9 +9,9 @@ class ParallelDate:
 
     def update_date(self, seconds):
         self.__seconds = seconds*self.seconds_representation;
-        self.__minutes, self.seconds = divmod(self.__seconds, 60)
-        self.__hours, self.minutes = divmod(self.__minutes, 60)
-        self.__days, self.hours = divmod(self.__hours, 24)
+        self.__minutes, self.__seconds = divmod(self.__seconds, 60)
+        self.__hours, self.__minutes = divmod(self.__minutes, 60)
+        self.__days, self.__hours = divmod(self.__hours, 24)
 
     def get_seconds(self):
         return str(int(self.__seconds))
