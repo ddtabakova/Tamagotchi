@@ -1,6 +1,7 @@
 import pygame
 import random
 from threading import Timer
+from panda_view import PandaView
 pygame.init()
 
 
@@ -32,12 +33,12 @@ class Panda():
     POSITIVE_UPDATE = 1.0
     NEGATIVE_UPDATE = -1.0
 
-    def __init__(self):
-        self._start = pygame.time.get_ticks()
-        self._delay = 500
-        self._last_update = 0
-        self._frame = 0
+    NORMAL_PANDA = pygame.image.load('panda_sprite_normal.png')
+    EATING_PANDA = pygame.image.load('panda_sprite_eating.png')
+    ANGRY_PANDA = pygame.image.load('panda_sprite_angry.png')
 
+    def __init__(self):
+        self._panda_view = PandaView(self.NORMAL_PANDA, 250, 270)
         self._feed = 1.0;
         self._play = 1.0;
         self._clean = 1.0;
@@ -65,8 +66,8 @@ class Panda():
     def get_cure(self):
         return self._cure;
 
-    def get_image(self):
-        return self.image
+    def get_panda_view(self, time):
+        return self._panda_view.get_image(time)
 
     def calculate_happiness(self):
         self._happiness = (self._feed + self._clean + self._play
@@ -74,7 +75,6 @@ class Panda():
         self.__check_cure()
 
     def __check_cure(self):
-        print(self._happiness)
         if self._happiness < 0.5 or self._feed == 0.0 or self._sleep == 0.0 or self._clean == 0.0:
             if self.__should_make_ill():
                 self.update_ill(self.NEGATIVE_UPDATE)
@@ -97,12 +97,32 @@ class Panda():
                 self._state = self.STATE_NORMAL
                 return
         self._sleep_timer = Timer(10.0, self.go_to_sleep).start()
+
+    def eat(self):
+        if self._state == self.STATE_NORMAL:
+            if self._feed == 1.0:
+                print("go angry!")
+                self._panda_view.change_state(self.ANGRY_PANDA)
+                self._angry_timer = Timer(3.0, self._go_to_normal).start()
+                return
+
+            self._state = self.STATE_EATING
+            self._panda_view.change_state(self.EATING_PANDA)
+            self._eat_timer = Timer(5.0, self._finish_eating).start()
+
+    def _go_to_normal(self):
+        self._panda_view.change_state(self.NORMAL_PANDA)
+
+    def _finish_eating(self):
+        self._state = self.STATE_NORMAL
+        self._panda_view.change_state(self.NORMAL_PANDA)
+        self.update_hungry(self.POSITIVE_UPDATE)
             
-        
     def update_hungry(self, is_positive_update):
-        update = self.UPDATE_FEED_BY*is_positive_update
-        self._feed = self.__update_feeling(self._feed, update, is_positive_update)
-        self.calculate_happiness()
+        if self._state == self.STATE_NORMAL:
+            update = self.UPDATE_FEED_BY*is_positive_update
+            self._feed = self.__update_feeling(self._feed, update, is_positive_update)
+            self.calculate_happiness()
 
     def update_dirty(self, is_positive_update):
         update = self.UPDATE_CLEAN_BY*is_positive_update

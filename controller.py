@@ -22,15 +22,18 @@ class GameController:
         self.__playtime = 0.0
         self.__clock = pygame.time.Clock()
         self.__date = ParallelDate(144.0)
-        self.__initialize()
         self.__panda = Panda()
         self.__setup_panda(self.__panda)
+        self.__initialize()
 
     def __initialize(self):
         """set up game screen elements"""
         self.__screen.blit(BG_IMAGE, (0, 50))
         self.__screen.blit(BG_IMAGE_BOTTOM, (0, 405))
         self.__screen.blit(BG_IMAGE_TOP, (0, 0))
+        ticks = pygame.time.get_ticks()
+        self.__screen.blit(self.__panda.get_panda_view(ticks), (90, 110))
+        
         self.__buttons = []
         self.__setup_buttons(self.__buttons)
         self.__setup_progress_bars()
@@ -82,7 +85,7 @@ class GameController:
     def __button_pressed(self, index):
         """button pressed callback actions"""
         if index == 0:
-            self.__panda.update_hungry(self.__panda.POSITIVE_UPDATE)
+            self.__panda.eat()
         elif index == 1:
             self.__panda.update_playful(self.__panda.POSITIVE_UPDATE)
         elif index == 2:
