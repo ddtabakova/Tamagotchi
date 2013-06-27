@@ -87,11 +87,11 @@ class GameController:
         if index == 0:
             self.__panda.eat()
         elif index == 1:
-            self.__panda.update_playful(self.__panda.POSITIVE_UPDATE)
+            self.__panda.play()
         elif index == 2:
             self.__panda.bath()
         elif index == 3:
-            self.__panda.go_to_sleep()
+            self.__panda.sleep()
         elif index == 4:
             self.__panda.heal()
 
