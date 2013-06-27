@@ -32,7 +32,7 @@ class GameController:
         self.__screen.blit(BG_IMAGE_BOTTOM, (0, 405))
         self.__screen.blit(BG_IMAGE_TOP, (0, 0))
         ticks = pygame.time.get_ticks()
-        self.__screen.blit(self.__panda.get_panda_view(ticks), (90, 110))
+        self.__screen.blit(self.__panda.get_panda_view(ticks), (90, 90))
         
         self.__buttons = []
         self.__setup_buttons(self.__buttons)
@@ -93,7 +93,7 @@ class GameController:
         elif index == 3:
             self.__panda.go_to_sleep()
         elif index == 4:
-            self.__panda.update_ill(self.__panda.POSITIVE_UPDATE)
+            self.__panda.heal()
 
     def update_game(self):
         self.__initialize()

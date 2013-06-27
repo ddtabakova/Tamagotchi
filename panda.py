@@ -37,9 +37,11 @@ class Panda():
     EATING_PANDA = pygame.image.load('panda_sprite_eating.png')
     ANGRY_PANDA = pygame.image.load('panda_sprite_angry.png')
     BATH_PANDA = pygame.image.load('panda_sprite_bath.png')
+    SLEEPY_PANDA = pygame.image.load('panda_sprite_sleep.png')
+    HEALING_PANDA = pygame.image.load('panda_sprite_cure.png')
 
     def __init__(self):
-        self._panda_view = PandaView(self.NORMAL_PANDA, 250, 270)
+        self._panda_view = PandaView(self.NORMAL_PANDA, 250, 300)
         self._feed = 1.0;
         self._play = 1.0;
         self._clean = 1.0;
@@ -89,13 +91,17 @@ class Panda():
 
     def go_to_sleep(self):
         if self._state == self.STATE_NORMAL:
+            if self._sleep == 1.0:
+                self._go_angry()
+                return
             self._state = self.STATE_SLEEPING
+            self._panda_view.change_state(self.SLEEPY_PANDA)
         elif self._state == self.STATE_SLEEPING:
             self.update_sleepy(self.POSITIVE_UPDATE)
             if self._sleep == 1.0:
                 if self._sleep_timer:
                     self._sleep_timer.cancel()
-                self._state = self.STATE_NORMAL
+                self._go_to_normal()
                 return
         self._sleep_timer = Timer(10.0, self.go_to_sleep).start()
 
@@ -118,6 +124,16 @@ class Panda():
             self._state = self.STATE_BATHING
             self._panda_view.change_state(self.BATH_PANDA)
             self._bath_timer = Timer(3.0, self._finish_bathing).start()
+
+    def heal(self):
+        if self._state == self.STATE_NORMAL:
+            if self._cure == 1.0:
+                self._go_angry()
+                return
+
+        self._state = self.STATE_HEALING
+        self._panda_view.change_state(self.HEALING_PANDA)
+        self._heal_timer = Timer(3.0, self._finish_healing).start()
                 
     def _go_angry(self):
         self._panda_view.change_state(self.ANGRY_PANDA)
@@ -134,6 +150,10 @@ class Panda():
     def _finish_bathing(self):
         self._go_to_normal()
         self.update_dirty(self.POSITIVE_UPDATE)
+
+    def _finish_healing(self):
+        self._go_to_normal()
+        self.update_ill(self.POSITIVE_UPDATE)
             
     def update_hungry(self, is_positive_update):
         if self._state == self.STATE_NORMAL:
