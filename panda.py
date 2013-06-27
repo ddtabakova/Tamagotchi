@@ -1,12 +1,21 @@
 import pygame
+import random
+from threading import Timer
 pygame.init()
 
 
-class Panda(pygame.sprite.Sprite):
-    TIME_HUNGRY = 30000
-    TIME_DIRTY = 30000
-    TIME_PLAYFUL = 75000
-    TIME_SLEEPY = 75000
+class Panda():
+    STATE_EATING = 1
+    STATE_PLAYING = 2
+    STATE_BATHING = 3
+    STATE_SLEEPING = 4
+    STATE_HEALING = 5
+    STATE_NORMAL = 0
+    
+    TIME_HUNGRY = 10000
+    TIME_DIRTY = 10000
+    TIME_PLAYFUL = 25000
+    TIME_SLEEPY = 25000
     
     EVENT_HUNGRY = pygame.USEREVENT + 1
     EVENT_DIRTY = pygame.USEREVENT + 2
@@ -24,8 +33,6 @@ class Panda(pygame.sprite.Sprite):
     NEGATIVE_UPDATE = -1.0
 
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-
         self._start = pygame.time.get_ticks()
         self._delay = 500
         self._last_update = 0
@@ -36,17 +43,9 @@ class Panda(pygame.sprite.Sprite):
         self._clean = 1.0;
         self._sleep = 1.0;
         self._cure = 1.0;
+        self._state = self.STATE_NORMAL
 
         self.calculate_happiness()
-        
-        self._images = []
-        for i in range(0,2):
-            image_path = "{0}.png".format(i+1)
-            image = pygame.image.load(image_path)
-            self._images.append(image)
-
-        self.image = self._images[0]
-        self.update(pygame.time.get_ticks())
 
     def get_happiness(self):
         return self._happiness
@@ -69,21 +68,37 @@ class Panda(pygame.sprite.Sprite):
     def get_image(self):
         return self.image
 
-    def update(self, t):
-        if t - self._last_update > self._delay:
-            self._frame += 1
-            if self._frame >= len(self._images): self._frame = 0
-            if self._frame < len(self._images):
-                self.image = self._images[self._frame]
-                self._last_update = t
-
-    def reset(self):
-        if self._frame >= len(self._images): self._frame = 0
-
     def calculate_happiness(self):
         self._happiness = (self._feed + self._clean + self._play
                            + self._sleep + self._cure)/5
- 
+        self.__check_cure()
+
+    def __check_cure(self):
+        print(self._happiness)
+        if self._happiness < 0.5 or self._feed == 0.0 or self._sleep == 0.0 or self._clean == 0.0:
+            if self.__should_make_ill():
+                self.update_ill(self.NEGATIVE_UPDATE)
+
+    def __should_make_ill(self):
+        if self._cure > 0.0:
+            r = random.randint(1, 10)
+            if r < 4:
+                return True
+        return False
+
+    def go_to_sleep(self):
+        if self._state == self.STATE_NORMAL:
+            self._state = self.STATE_SLEEPING
+        elif self._state == self.STATE_SLEEPING:
+            self.update_sleepy(self.POSITIVE_UPDATE)
+            if self._sleep == 1.0:
+                if self._sleep_timer:
+                    self._sleep_timer.cancel()
+                self._state = self.STATE_NORMAL
+                return
+        self._sleep_timer = Timer(10.0, self.go_to_sleep).start()
+            
+        
     def update_hungry(self, is_positive_update):
         update = self.UPDATE_FEED_BY*is_positive_update
         self._feed = self.__update_feeling(self._feed, update, is_positive_update)
@@ -100,6 +115,8 @@ class Panda(pygame.sprite.Sprite):
         self.calculate_happiness()
 
     def update_sleepy(self, is_positive_update):
+        if self._state == self.STATE_SLEEPING and is_positive_update == self.NEGATIVE_UPDATE:
+            return
         update = self.UPDATE_SLEEP_BY*is_positive_update
         self._sleep = self.__update_feeling(self._sleep, update, is_positive_update)
         self.calculate_happiness()

@@ -88,7 +88,7 @@ class GameController:
         elif index == 2:
             self.__panda.update_dirty(self.__panda.POSITIVE_UPDATE)
         elif index == 3:
-            self.__panda.update_sleepy(self.__panda.POSITIVE_UPDATE)
+            self.__panda.go_to_sleep()
         elif index == 4:
             self.__panda.update_ill(self.__panda.POSITIVE_UPDATE)
 
