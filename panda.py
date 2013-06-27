@@ -36,6 +36,7 @@ class Panda():
     NORMAL_PANDA = pygame.image.load('panda_sprite_normal.png')
     EATING_PANDA = pygame.image.load('panda_sprite_eating.png')
     ANGRY_PANDA = pygame.image.load('panda_sprite_angry.png')
+    BATH_PANDA = pygame.image.load('panda_sprite_bath.png')
 
     def __init__(self):
         self._panda_view = PandaView(self.NORMAL_PANDA, 250, 270)
@@ -101,22 +102,38 @@ class Panda():
     def eat(self):
         if self._state == self.STATE_NORMAL:
             if self._feed == 1.0:
-                print("go angry!")
-                self._panda_view.change_state(self.ANGRY_PANDA)
-                self._angry_timer = Timer(3.0, self._go_to_normal).start()
+                self._go_angry()
                 return
 
             self._state = self.STATE_EATING
             self._panda_view.change_state(self.EATING_PANDA)
             self._eat_timer = Timer(5.0, self._finish_eating).start()
 
+    def bath(self):
+        if self._state == self.STATE_NORMAL:
+            if self._clean == 1.0:
+                self._go_angry()
+                return
+
+            self._state = self.STATE_BATHING
+            self._panda_view.change_state(self.BATH_PANDA)
+            self._bath_timer = Timer(3.0, self._finish_bathing).start()
+                
+    def _go_angry(self):
+        self._panda_view.change_state(self.ANGRY_PANDA)
+        self._angry_timer = Timer(3.0, self._go_to_normal).start()
+
     def _go_to_normal(self):
+        self._state = self.STATE_NORMAL
         self._panda_view.change_state(self.NORMAL_PANDA)
 
     def _finish_eating(self):
-        self._state = self.STATE_NORMAL
-        self._panda_view.change_state(self.NORMAL_PANDA)
+        self._go_to_normal()
         self.update_hungry(self.POSITIVE_UPDATE)
+
+    def _finish_bathing(self):
+        self._go_to_normal()
+        self.update_dirty(self.POSITIVE_UPDATE)
             
     def update_hungry(self, is_positive_update):
         if self._state == self.STATE_NORMAL:
