@@ -6,6 +6,7 @@ BG_COLOR_POSITIVE = (160, 203, 60)
 BG_COLOR_NEGATIVE = (255, 0, 0)
 BG_COLOR = (250, 250, 180)
 
+
 class ProgressBar:
 
     def __init__(self, origin_x, origin_y, size_width, size_height,
@@ -25,10 +26,9 @@ class ProgressBar:
 
         self.__display(self.screen)
 
-
     def __display(self, surface):
         pygame.draw.rect(surface, (60, 110, 20), self.rect, 3)
         pygame.draw.rect(surface, self.bg_color, self.rect, 0)
-        pygame.draw.rect(surface, self.progress_color,
-                         (self.rect.x, self.rect.y,
-                          self.progress_width, self.rect.h))        
+        r = pygame.Rect(self.rect.x, self.rect.y,
+                        self.progress_width, self.rect.h)
+        pygame.draw.rect(surface, self.progress_color, r)

@@ -16,7 +16,6 @@ LABELS_FONT = pygame.font.SysFont("Ariel", 20)
 
 class GameController:
 
-    
     def __init__(self, screen):
         self.__screen = screen
         self.__playtime = 0.0
@@ -32,17 +31,19 @@ class GameController:
         self.__screen.blit(BG_IMAGE_BOTTOM, (0, 405))
         self.__screen.blit(BG_IMAGE_TOP, (0, 0))
         ticks = pygame.time.get_ticks()
-        self.__screen.blit(self.__panda.get_panda_view(ticks), (90, 90))
-        
+        for image in self.__panda.get_panda_view(ticks):
+            self.__screen.blit(image, (90, 90))
+
         self.__buttons = []
         self.__setup_buttons(self.__buttons)
         self.__setup_progress_bars()
 
     def __setup_buttons(self, buttons):
         """set up control buttons"""
-        for i in range(0,5):
+        for i in range(0, 5):
             name = "button-{0}.png".format(i)
-            button = Button(23 + i*75, 410, 75, 75, name, self.__button_pressed)
+            button = Button(23 + i*75, 410, 75, 75, name,
+                            self.__button_pressed)
             button.display(self.__screen)
             buttons.append(button)
 
@@ -60,7 +61,7 @@ class GameController:
         i = 0
         for k in pbs.keys():
             pb = ProgressBar(72*i + 37, 23, 60, 20, 0.0, self.__screen)
-            pbs[k] = pb;
+            pbs[k] = pb
             i = i + 1
         self.__pb_controller = ProgressBarController(pbs)
 
@@ -73,15 +74,19 @@ class GameController:
 
     def __update_game_info(self):
         """renders happiness and time labels"""
-        happiness_display = str(int(self.__panda.get_happiness()*100))
-        happiness_label = LABELS_FONT.render("Happiness: " + happiness_display + "%", 0, (1, 1, 1), None)
-        self.__screen.blit(happiness_label, (12, 52))
+        happy_value = str(int(self.__panda.get_happiness()*100))
+        happy_text = "Happiness: {0}%".format(happy_value)
+        happy_label = LABELS_FONT.render(happy_text, 0, (1, 1, 1), None)
+        self.__screen.blit(happy_label, (12, 52))
 
         self.__date.update_date(self.__playtime)
-        time_display = self.__date.get_days() + " d " + self.__date.get_hours() + " h "+  self.__date.get_minutes() + " m"
+        d = self.__date.get_days()
+        h = self.__date.get_hours()
+        m = self.__date.get_minutes()
+        time_display = "{0} d {1} h {2} m".format(d, h, m)
         time_label = LABELS_FONT.render(time_display, 0, (1, 1, 1), None)
         self.__screen.blit(time_label, (200, 52))
-        
+
     def __button_pressed(self, index):
         """button pressed callback actions"""
         if index == 0:
@@ -104,7 +109,7 @@ class GameController:
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            for i in range(0,5):
+            for i in range(0, 5):
                 b = self.__buttons[i]
                 if b.pressed(event.pos):
                     b.action(i)
@@ -118,6 +123,3 @@ class GameController:
             self.__panda.update_sleepy(self.__panda.NEGATIVE_UPDATE)
         elif event.type == self.__panda.EVENT_ILL:
             self.__panda.update_ill(self.__panda.NEGATIVE_UPDATE)
-
-
-    

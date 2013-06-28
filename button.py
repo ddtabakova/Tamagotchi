@@ -1,5 +1,4 @@
 import pygame
-pygame.init()
 
 
 class Button:
@@ -19,8 +18,3 @@ class Button:
         if self.rect.collidepoint(mouse_pos):
             return True
         return False
-
-        
-        
-        
-    

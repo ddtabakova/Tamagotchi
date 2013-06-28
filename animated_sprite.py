@@ -15,10 +15,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
     def change_images(self, images):
         self._images = images
-        
+
     def update(self, t):
         if t - self._last_update > self._delay:
             self._frame += 1
-            if self._frame >= len(self._images): self._frame = 0
+            if self._frame >= len(self._images):
+                self._frame = 0
             self.image = self._images[self._frame]
             self._last_update = t

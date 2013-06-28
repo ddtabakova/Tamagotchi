@@ -3,7 +3,6 @@ from animated_sprite import AnimatedSprite
 
 
 class PandaView:
-    
 
     def __init__(self, image, width, height):
         self.__width = width
@@ -24,5 +23,7 @@ class PandaView:
 
         master_width, master_height = self.__image.get_size()
         for i in range(int(master_width/self.__width)):
-            images.append(self.__image.subsurface((i*self.__width, 0, self.__width, self.__height)))
+            image = self.__image.subsurface((i*self.__width, 0,
+                                             self.__width, self.__height))
+            images.append(image)
         return images

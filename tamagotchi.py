@@ -2,6 +2,7 @@ import numpy
 import pygame
 from controller import GameController
 
+
 class Game:
     running = True
 
@@ -21,7 +22,6 @@ class Game:
                     return
                 else:
                     controller.handle_event(event)
-            
 
 if __name__ == '__main__':
     Game((420, 480)).main()
