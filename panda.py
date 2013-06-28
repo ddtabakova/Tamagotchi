@@ -13,8 +13,8 @@ class Panda():
     STATE_HEALING = 5
     STATE_NORMAL = 0
     
-    TIME_HUNGRY = 10000
-    TIME_DIRTY = 10000
+    TIME_HUNGRY = 15000
+    TIME_DIRTY = 30000
     TIME_PLAYFUL = 25000
     TIME_SLEEPY = 25000
     
@@ -24,8 +24,8 @@ class Panda():
     EVENT_SLEEPY = pygame.USEREVENT + 4
     EVENT_ILL = pygame.USEREVENT + 5
     
-    UPDATE_FEED_BY = 0.20
-    UPDATE_CLEAN_BY = 0.25
+    UPDATE_FEED_BY = 0.25
+    UPDATE_CLEAN_BY = 0.50
     UPDATE_PLAY_BY = 0.25
     UPDATE_SLEEP_BY = 0.25
     UPDATE_CURE_BY = 0.50
@@ -40,6 +40,9 @@ class Panda():
     SLEEPY_PANDA = pygame.image.load('panda_sprite_sleep.png')
     HEALING_PANDA = pygame.image.load('panda_sprite_cure.png')
     PLAYING_PANDA = pygame.image.load('panda_sprite_play.png')
+    HAPPY1_PANDA = pygame.image.load('panda_sprite_happy1.png')
+    HAPPY2_PANDA = pygame.image.load('panda_sprite_happy2.png')
+    HAPPY3_PANDA = pygame.image.load('panda_sprite_happy3.png')
 
     def __init__(self):
         self._panda_view = PandaView(self.NORMAL_PANDA, 250, 300)
@@ -49,7 +52,7 @@ class Panda():
         self._sleep = 1.0;
         self._cure = 1.0;
         self._state = self.STATE_NORMAL
-
+        self._happy_images = [self.HAPPY1_PANDA, self.HAPPY2_PANDA, self.HAPPY3_PANDA]
         self.calculate_happiness()
 
     def get_happiness(self):
@@ -77,6 +80,7 @@ class Panda():
         self._happiness = (self._feed + self._clean + self._play
                            + self._sleep + self._cure)/5
         self.__check_cure()
+        self.__check_sleep()
 
     def __check_cure(self):
         if self._happiness < 0.5 or self._feed == 0.0 or self._sleep == 0.0 or self._clean == 0.0:
@@ -89,6 +93,10 @@ class Panda():
             if r < 4:
                 return True
         return False
+
+    def __check_sleep(self):
+        if self._sleep == 0.0:
+            self.sleep()
 
     def sleep(self):
         if self._state == self.STATE_NORMAL:
@@ -104,47 +112,41 @@ class Panda():
                     self._sleep_timer.cancel()
                 self._go_to_normal()
                 return
-        self._sleep_timer = Timer(10.0, self.sleep).start()
+        self._sleep_timer = Timer(8.0, self.sleep)
+        self._sleep_timer.start()
 
     def play(self):
-        if self._state == self.STATE_NORMAL:
-            if self._play == 1.0:
-                self._go_angry()
-                return
-
-        self._state = self.STATE_PLAYING
-        self._panda_view.change_state(self.PLAYING_PANDA)
-        self._play_timer = Timer(4.0, self._finish_activity, [self.update_playful]).start()
+        change_state = self._go_do_this(self._play, self.PLAYING_PANDA, 4.0, self.update_playful)
+        if change_state:
+            self._state = self.STATE_PLAYING
             
     def eat(self):
-        if self._state == self.STATE_NORMAL:
-            if self._feed == 1.0:
-                self._go_angry()
-                return
-
+        change_state = self._go_do_this(self._feed, self.EATING_PANDA, 5.0, self.update_hungry)
+        if change_state:
             self._state = self.STATE_EATING
-            self._panda_view.change_state(self.EATING_PANDA)
-            self._eat_timer = Timer(5.0, self._finish_activity, [self.update_hungry]).start()
 
     def bath(self):
-        if self._state == self.STATE_NORMAL:
-            if self._clean == 1.0:
-                self._go_angry()
-                return
-
-            self._state = self.STATE_BATHING
-            self._panda_view.change_state(self.BATH_PANDA)
-            self._bath_timer = Timer(3.0, self._finish_activity, [self.update_dirty]).start()
+            change_state = self._go_do_this(self._clean, self.BATH_PANDA, 3.0, self.update_dirty)
+            if change_state:
+                self._state = self.STATE_BATHING
 
     def heal(self):
-        if self._state == self.STATE_NORMAL:
-            if self._cure == 1.0:
-                self._go_angry()
-                return
+        change_state = self._go_do_this(self._cure, self.HEALING_PANDA, 4.0, self.update_ill)
+        if change_state:
+            self._state = self.STATE_HEALING
 
-        self._state = self.STATE_HEALING
-        self._panda_view.change_state(self.HEALING_PANDA)
-        self._heal_timer = Timer(3.0, self._finish_activity, [self.update_ill]).start()
+    def _go_do_this(self, feeling, state_image, time, callback):
+        if (self._state == self.STATE_NORMAL and feeling == 1.0) or self._state == self.STATE_SLEEPING:
+            if self._state == self.STATE_SLEEPING:
+                if self._sleep_timer:
+                    self._sleep_timer.cancel()
+                self._state = self.STATE_NORMAL
+            self._go_angry()
+            return False
+
+        self._panda_view.change_state(state_image)
+        self._activity_timer = Timer(time, self._finish_activity, [callback]).start()
+        return True
                 
     def _go_angry(self):
         self._panda_view.change_state(self.ANGRY_PANDA)
@@ -155,14 +157,18 @@ class Panda():
         self._panda_view.change_state(self.NORMAL_PANDA)
 
     def _finish_activity(self, callback):
-        self._go_to_normal()
         callback(self.POSITIVE_UPDATE)
+        self._panda_view.change_state(self._get_happy_face())
+        self._happy_timer = Timer(2.0, self._go_to_normal).start()
+
+    def _get_happy_face(self):
+        r = random.randint(0, 2)
+        return self._happy_images[r]
         
     def update_hungry(self, is_positive_update):
-        if self._state == self.STATE_NORMAL:
-            update = self.UPDATE_FEED_BY*is_positive_update
-            self._feed = self.__update_feeling(self._feed, update, is_positive_update)
-            self.calculate_happiness()
+        update = self.UPDATE_FEED_BY*is_positive_update
+        self._feed = self.__update_feeling(self._feed, update, is_positive_update)
+        self.calculate_happiness()
 
     def update_dirty(self, is_positive_update):
         update = self.UPDATE_CLEAN_BY*is_positive_update
@@ -170,7 +176,7 @@ class Panda():
         self.calculate_happiness()
 
     def update_playful(self, is_positive_update):
-        update = self.UPDATE_CLEAN_BY*is_positive_update
+        update = self.UPDATE_PLAY_BY*is_positive_update
         self._play = self.__update_feeling(self._play, update, is_positive_update)
         self.calculate_happiness()
 
