@@ -12,6 +12,7 @@ class Panda():
     STATE_SLEEPING = 4
     STATE_HEALING = 5
     STATE_NORMAL = 0
+    STATE_DEAD = -1
 
     TIME_HUNGRY = 20000
     TIME_DIRTY = 50000
@@ -44,12 +45,14 @@ class Panda():
     HAPPY2_PANDA = pygame.image.load('panda_sprite_happy2.png')
     HAPPY3_PANDA = pygame.image.load('panda_sprite_happy3.png')
     DIRTY1_PANDA = pygame.image.load('panda_dirty1.png')
-    DIRTY2_PANDA = pygame.image.load('panda_dirty2.png')
+    DIRTY2_PANDA = pygame.image.load('panda_poop.png')
     SICK1_PANDA = pygame.image.load('panda_sick1.png')
     SICK2_PANDA = pygame.image.load('panda_sick2.png')
+    DEAD_PANDA = pygame.image.load('panda_sprite_dead.png')
 
     def __init__(self):
         self._panda_view = PandaView(self.NORMAL_PANDA, 250, 300)
+        self._is_alive = True
         self._feed = 1.0
         self._play = 1.0
         self._clean = 1.0
@@ -81,6 +84,9 @@ class Panda():
     def get_cure(self):
         return self._cure
 
+    def get_alive(self):
+        return self._is_alive
+
     def get_panda_view(self, time):
         images = [self._panda_view.get_image(time)]
         if (self._state == self.STATE_SLEEPING or
@@ -102,8 +108,23 @@ class Panda():
                            + self._sleep + self._cure)/5
         self.__check_cure()
         self.__check_sleep()
+        self.__check_kill()
+
+    def kill(self):
+        self._feed = 0.0
+        self._play = 0.0
+        self._clean = 0.0
+        self._sleep = 0.0
+        self._cure = 0.0
+        self._is_alive = False
+        self._state = self.STATE_DEAD
+        self._panda_view.change_state(self.DEAD_PANDA)
 
  #-------->auto activities
+    def __check_kill(self):
+        if self._happiness < 0.1:
+            self.kill()
+
     def __check_cure(self):
         if (self._happiness < 0.5 or self._feed == 0.0 or
                 self._sleep == 0.0 or self._clean == 0.0):
@@ -136,7 +157,7 @@ class Panda():
                     self._sleep_timer.cancel()
                 self._go_to_normal()
                 return
-        self._sleep_timer = Timer(8.0, self.sleep)
+        self._sleep_timer = Timer(6.0, self.sleep)
         self._sleep_timer.start()
 
     def play(self):

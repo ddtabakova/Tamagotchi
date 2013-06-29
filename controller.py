@@ -89,6 +89,8 @@ class GameController:
 
     def __button_pressed(self, index):
         """button pressed callback actions"""
+        if not self.__panda:
+            return
         if index == 0:
             self.__panda.eat()
         elif index == 1:
@@ -102,18 +104,24 @@ class GameController:
 
     def update_game(self):
         self.__initialize()
-        self.__playtime += (self.__clock.tick()/1000)
+        if self.__panda.get_alive():
+            self.__playtime += (self.__clock.tick()/1000)
         self.__update_progress()
         self.__update_game_info()
         pygame.display.update()
 
     def handle_event(self, event):
+        if not self.__panda.get_alive():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.__panda = Panda()
+                self.__playtime = 0.0
+            return
         if event.type == pygame.MOUSEBUTTONDOWN:
             for i in range(0, 5):
                 b = self.__buttons[i]
                 if b.pressed(event.pos):
                     b.action(i)
-        elif event.type == self.__panda.EVENT_HUNGRY:
+        if event.type == self.__panda.EVENT_HUNGRY:
             self.__panda.update_hungry(self.__panda.NEGATIVE_UPDATE)
         elif event.type == self.__panda.EVENT_DIRTY:
             self.__panda.update_dirty(self.__panda.NEGATIVE_UPDATE)
