@@ -8,9 +8,9 @@ from progress_bars_controller import ProgressBarController
 from parallel_date import ParallelDate
 
 BG_COLOR = (240, 240, 240)
-BG_IMAGE = pygame.image.load('Bamboo.png')
-BG_IMAGE_BOTTOM = pygame.image.load('bottom-bg.png')
-BG_IMAGE_TOP = pygame.image.load('top-bg.png')
+BG_IMAGE = pygame.image.load('images/Bamboo.png')
+BG_IMAGE_BOTTOM = pygame.image.load('images/bottom-bg.png')
+BG_IMAGE_TOP = pygame.image.load('images/top-bg.png')
 LABELS_FONT = pygame.font.SysFont("Ariel", 20)
 
 
@@ -41,7 +41,7 @@ class GameController:
     def __setup_buttons(self, buttons):
         """set up control buttons"""
         for i in range(0, 5):
-            name = "button-{0}.png".format(i)
+            name = "images/button-{0}.png".format(i)
             button = Button(23 + i*75, 410, 75, 75, name,
                             self.__button_pressed)
             button.display(self.__screen)
